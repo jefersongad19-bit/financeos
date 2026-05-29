@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+mport { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell
@@ -9,6 +9,30 @@ import {
   Share2, Download, Upload, Users, Copy, CheckCheck, ChevronUp, ChevronDown,
   Filter, Search, ArrowUpCircle, ArrowDownCircle, Target, PiggyBank
 } from "lucide-react";
+
+// ── HOOK: Captura o evento de instalação PWA ──
+function useInstallPrompt() {
+  const [prompt, setPrompt] = useState(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setPrompt(e); };
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", () => { setInstalled(true); setPrompt(null); });
+    if (window.navigator.standalone) setInstalled(true);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const install = async () => {
+    if (!prompt) return;
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === "accepted") setInstalled(true);
+    setPrompt(null);
+  };
+
+  return { prompt, installed, install };
+}
 
 const INITIAL_TRANSACTIONS = [
   { id: 1, type: "entrada", desc: "Salário", value: 4500, category: "Renda", date: "2026-05-05" },
@@ -153,6 +177,7 @@ function FocusInput({ style, onFocus, onBlur, ...props }) {
 // ══════════════════════════════════════════════════════════
 export default function FinanceOS() {
   const [tab, setTab] = useState("dashboard");
+  const { prompt: installPrompt, installed: isInstalled, install: installApp } = useInstallPrompt();
   const [transactions, setTransactions] = useState(() => loadLS("fos_tx", INITIAL_TRANSACTIONS));
   const [parcelas, setParcelas] = useState(() => loadLS("fos_parc", INITIAL_PARCELAS));
   const [showModal, setShowModal] = useState(null);
@@ -427,6 +452,32 @@ export default function FinanceOS() {
           ))}
         </div>
       </div>
+
+
+      {/* ═══════════ BANNER INSTALAR PWA ═══════════ */}
+      {(installPrompt || (!isInstalled && /iphone|ipad|ipod/i.test(navigator.userAgent))) && (
+        <div style={{ flexShrink: 0, background: "linear-gradient(135deg,#00d4aa22,#6366f122)", borderBottom: "1px solid rgba(0,212,170,0.3)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 36, height: 36, background: "linear-gradient(135deg,#00d4aa,#6366f1)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Zap size={18} color="#fff"/>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#f8fafc" }}>Instalar FinanceOS</div>
+            <div style={{ fontSize: 11, color: "#9ca3af" }}>
+              {/iphone|ipad|ipod/i.test(navigator.userAgent)
+                ? 'Toque em "Compartilhar" → "Adicionar à tela inicial"'
+                : "Adicione à tela inicial e use como app nativo"}
+            </div>
+          </div>
+          {installPrompt && (
+            <button
+              onClick={installApp}
+              style={{ background: "linear-gradient(135deg,#00d4aa,#6366f1)", border: "none", borderRadius: 10, padding: "8px 14px", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0 }}
+            >
+              Instalar
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ═══════════ CONTEÚDO ROLÁVEL ═══════════ */}
       <div style={C.pageWrapper}>
