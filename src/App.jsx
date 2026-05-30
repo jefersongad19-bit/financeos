@@ -455,7 +455,7 @@ export default function FinanceOS() {
 
 
       {/* ═══════════ BANNER INSTALAR PWA ═══════════ */}
-      {(installPrompt || (!isInstalled && /iphone|ipad|ipod/i.test(navigator.userAgent))) && (
+      {!isInstalled && (
         <div style={{ flexShrink: 0, background: "linear-gradient(135deg,#00d4aa22,#6366f122)", borderBottom: "1px solid rgba(0,212,170,0.3)", padding: "10px 16px", display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, background: "linear-gradient(135deg,#00d4aa,#6366f1)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Zap size={18} color="#fff"/>
