@@ -468,7 +468,7 @@ export default function FinanceOS() {
                 : "Adicione à tela inicial e use como app nativo"}
             </div>
           </div>
-          {installPrompt && (
+          {(
             <button
               onClick={installApp}
               style={{ background: "linear-gradient(135deg,#00d4aa,#6366f1)", border: "none", borderRadius: 10, padding: "8px 14px", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", flexShrink: 0 }}
